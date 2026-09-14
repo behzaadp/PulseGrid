@@ -1,0 +1,9 @@
+{
+  "name": "pulsegrid-engine",
+  "version": "1.0.0",
+  "description": "Simulation Engine for PulseGrid",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
