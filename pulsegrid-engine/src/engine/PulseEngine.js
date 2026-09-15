@@ -9,7 +9,6 @@ class PulseEngine extends EventEmitter {
     super();
     this.sessionId = sessionId;
     
-    // Isolated Topology Maps
     this.nodes = new Map();
     this.edges = new Map();
     
@@ -25,8 +24,6 @@ class PulseEngine extends EventEmitter {
     this.trafficAccumulator = 0;
   }
 
-  // --- Topology CRUD Operations ---
-
   addNode(node) {
     this.nodes.set(node.id, node);
     node.on('packet:processed', (data) => this.handlePacketProcessed(data));
@@ -37,7 +34,6 @@ class PulseEngine extends EventEmitter {
 
   removeNode(nodeId) {
     this.nodes.delete(nodeId);
-    // Remove orphaned edges
     for (const [edgeId, edge] of this.edges) {
       if (edge.sourceId === nodeId || edge.targetId === nodeId) {
         this.edges.delete(edgeId);
@@ -67,11 +63,9 @@ class PulseEngine extends EventEmitter {
   clearTopology() {
     this.nodes.clear();
     this.edges.clear();
-    this.previousState = { nodes: {}, edges: {} };
+    // Intentionally leaving previousState intact here so broadcastTick detects the massive deletion
     this.emit('topology:changed');
   }
-
-  // --- Engine Loops ---
 
   start() {
     if (this.isRunning) return;
@@ -106,9 +100,11 @@ class PulseEngine extends EventEmitter {
 
   broadcastTick() {
     const currentState = { nodes: {}, edges: {} };
-    const diff = { nodes: {}, edges: {} };
+    // ADDED: Arrays to explicitly track deletions
+    const diff = { nodes: {}, edges: {}, deletedNodes: [], deletedEdges: [] };
     let hasChanges = false;
 
+    // Check for updates & additions
     for (const [id, node] of this.nodes) {
       const snap = node.getSnapshot();
       currentState.nodes[id] = snap;
@@ -127,14 +123,27 @@ class PulseEngine extends EventEmitter {
       }
     }
 
+    // ADDED: Detect Deletions
+    for (const id of Object.keys(this.previousState.nodes)) {
+      if (!this.nodes.has(id)) {
+        diff.deletedNodes.push(id);
+        hasChanges = true;
+      }
+    }
+
+    for (const id of Object.keys(this.previousState.edges)) {
+      if (!this.edges.has(id)) {
+        diff.deletedEdges.push(id);
+        hasChanges = true;
+      }
+    }
+
     this.previousState = currentState;
 
     if (hasChanges) {
       this.emit('broadcast:delta', diff);
     }
   }
-
-  // --- Networking & Traffic ---
 
   handlePacketProcessed({ nodeId, packet }) {
     const outboundEdges = Array.from(this.edges.values()).filter(e => e.sourceId === nodeId);
