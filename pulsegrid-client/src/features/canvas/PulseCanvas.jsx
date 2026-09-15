@@ -170,6 +170,7 @@ const PulseCanvas = () => {
         onSelectionChange={onSelectionChange}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        proOptions={{ hideAttribution: true }}
         fitView
         className="touch-none" // Prevents browser pull-to-refresh on mobile
       >
