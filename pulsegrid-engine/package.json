@@ -2,12 +2,12 @@
   "name": "pulsegrid-engine",
   "version": "1.0.0",
   "description": "Simulation Engine for PulseGrid",
-  "main": "server.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
-    "cors": "^2.8.6",
-    "ws": "^8.21.3"
+    "cors": "^2.8.5",
+    "ws": "^8.18.0"
   }
 }
