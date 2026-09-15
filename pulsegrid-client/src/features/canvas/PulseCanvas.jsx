@@ -18,7 +18,7 @@ import AuthNode from '../nodes/AuthNode';
 import DatabaseNode from '../nodes/DatabaseNode';
 import BrokerNode from '../nodes/BrokerNode';
 import WorkerNode from '../nodes/WorkerNode';
-import GenericNode from '../nodes/GenericNode';
+import GenericNode from '../nodes/ServiceNode';
 import TrafficEdge from '../edges/TrafficEdge';
 
 const nodeTypes = {
