@@ -13,10 +13,11 @@ const BuilderToolbar = () => {
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
-
-    const clearCanvas = () => {
-    websocketClient.sendCommand('CLEAR_TOPOLOGY');
   };
+
+  // Correctly placed inside the component
+  const clearCanvas = () => {
+    websocketClient.sendCommand('CLEAR_TOPOLOGY');
   };
 
   const nodeTypes = [
@@ -71,6 +72,8 @@ const BuilderToolbar = () => {
         >
           ⏸ <span className="mt-0.5">Stop</span>
         </button>
+
+        {/* Clear Canvas / Trash Button */}
         <button 
           onClick={clearCanvas}
           className="text-rose-600 border border-rose-200 bg-rose-50 px-2 py-2 rounded-lg shadow-sm hover:bg-rose-100 active:scale-95 active:shadow-inner transition-all flex items-center justify-center ml-2"
