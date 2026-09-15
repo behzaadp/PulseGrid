@@ -13,6 +13,10 @@ const BuilderToolbar = () => {
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+
+    const clearCanvas = () => {
+    websocketClient.sendCommand('CLEAR_TOPOLOGY');
+  };
   };
 
   const nodeTypes = [
@@ -66,6 +70,13 @@ const BuilderToolbar = () => {
           className="text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 px-4 py-2 rounded-lg shadow-sm hover:bg-slate-200 active:scale-95 active:shadow-inner transition-all flex items-center gap-1"
         >
           ⏸ <span className="mt-0.5">Stop</span>
+        </button>
+        <button 
+          onClick={clearCanvas}
+          className="text-rose-600 border border-rose-200 bg-rose-50 px-2 py-2 rounded-lg shadow-sm hover:bg-rose-100 active:scale-95 active:shadow-inner transition-all flex items-center justify-center ml-2"
+          title="Clear Canvas"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
         </button>
       </div>
     </div>
