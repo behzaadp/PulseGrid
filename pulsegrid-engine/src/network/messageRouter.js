@@ -1,5 +1,7 @@
 const simulationLoop = require('../engine/simulationLoop');
 const NodeFactory = require('../models/NodeFactory');
+const ChaosRegistry = require('../chaos/chaosRegistry');
+const BlueprintLoader = require('../engine/blueprintLoader');
 const { Edge } = require('../models/Edge');
 
 class MessageRouter {
@@ -60,14 +62,27 @@ class MessageRouter {
           break;
         }
         case 'INJECT_FAULT': {
-          // Payload expects { id: 'node_id', faultType: 'memory_leak', params: {} }
-          const node = simulationLoop.nodes.get(payload.id);
-          if (node) node.injectFault(payload.faultType, payload.params);
+          // Replaced direct injectFault with the Registry
+          ChaosRegistry.executeFault(payload.faultType, payload.id, payload.params);
           break;
         }
         case 'CLEAR_FAULT': {
-          const node = simulationLoop.nodes.get(payload.id);
-          if (node) node.clearFault(payload.faultType);
+          // Replaced direct clearFault with the Registry
+          ChaosRegistry.clearFault(payload.faultType, payload.id);
+          break;
+        }
+        case 'EXECUTE_SCENARIO': {
+          // New handler for system-wide catastrophes
+          ChaosRegistry.executeScenario(payload.scenarioId);
+          break;
+        }
+        
+        // --- Template Loading ---
+        case 'LOAD_BLUEPRINT': {
+          const blueprint = BlueprintLoader.getTemplate(payload.templateName);
+          if (blueprint) {
+             BlueprintLoader.load(blueprint);
+          }
           break;
         }
 
