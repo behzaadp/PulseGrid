@@ -2,10 +2,11 @@ import React from 'react';
 import useEngineStore from '../../store/useEngineStore';
 
 const TelemetryDashboard = () => {
-  const nodes = useEngineStore((state) => Object.values(state.nodes));
+  // Grab the raw object first to prevent Zustand infinite rendering loops
+  const nodesMap = useEngineStore((state) => state.nodes);
+  const nodes = Object.values(nodesMap);
   const isConnected = useEngineStore((state) => state.isConnected);
 
-  // Compute Global Metrics dynamically
   const totalNodes = nodes.length;
   const degradedCount = nodes.filter((n) => n.status === 'DEGRADED').length;
   const deadCount = nodes.filter((n) => n.status === 'DEAD').length;

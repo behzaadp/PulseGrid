@@ -5,7 +5,6 @@ class WebSocketClient {
     this.ws = null;
     this.reconnectTimer = null;
     this.reconnectAttempts = 0;
-    // Vite handles the environment switch automatically via .env files
     this.url = import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
   }
 
@@ -15,21 +14,23 @@ class WebSocketClient {
     }
 
     console.log(`[WebSocket] Connecting to ${this.url}...`);
-    this.ws = new WebSocket(this.url);
+    const ws = new WebSocket(this.url);
+    this.ws = ws; // Assign immediately
 
-    this.ws.onopen = () => {
+    ws.onopen = () => {
+      if (this.ws !== ws) return; // Prevent zombie instances from modifying state
       console.log('[WebSocket] Connection established.');
       this.reconnectAttempts = 0;
       useEngineStore.getState().setConnectionStatus(true);
       
-      // Clear any pending reconnects
       if (this.reconnectTimer) {
         clearTimeout(this.reconnectTimer);
         this.reconnectTimer = null;
       }
     };
 
-    this.ws.onmessage = (event) => {
+    ws.onmessage = (event) => {
+      if (this.ws !== ws) return;
       try {
         const data = JSON.parse(event.data);
         this.handleMessage(data);
@@ -38,15 +39,20 @@ class WebSocketClient {
       }
     };
 
-    this.ws.onclose = () => {
+    ws.onclose = () => {
+      if (this.ws !== ws) return;
       console.log('[WebSocket] Connection closed.');
       useEngineStore.getState().setConnectionStatus(false);
       this.attemptReconnect();
     };
 
-    this.ws.onerror = (error) => {
+    ws.onerror = (error) => {
+      if (this.ws !== ws) return;
       console.error('[WebSocket] Error occurred:', error);
-      this.ws.close();
+      // Safely close the current instance
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
     };
   }
 
@@ -65,14 +71,10 @@ class WebSocketClient {
         store.addNotification(payload.message);
         break;
       default:
-        // Ignore simple heartbeats or unknown types
         break;
     }
   }
 
-  /**
-   * Exposes a method for the React UI to send chaos and builder commands
-   */
   sendCommand(type, payload = {}) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type, payload }));
@@ -82,7 +84,6 @@ class WebSocketClient {
   }
 
   attemptReconnect() {
-    // Exponential backoff for reconnects (max 10 seconds)
     const delay = Math.min(1000 * (2 ** this.reconnectAttempts), 10000);
     this.reconnectAttempts++;
     
@@ -95,15 +96,18 @@ class WebSocketClient {
 
   disconnect() {
     if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+      const ws = this.ws;
+      this.ws = null; // Detach immediately so async handlers ignore it
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
     }
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
   }
 }
 
-// Export as a singleton
 const websocketClient = new WebSocketClient();
 export default websocketClient;
