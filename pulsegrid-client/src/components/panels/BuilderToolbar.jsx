@@ -1,7 +1,13 @@
 import React from 'react';
 import websocketClient from '../../services/websocketClient';
-import { getStatusColors } from '../../utils/constants';
-import { GatewayGraphic, AuthGraphic, ServiceGraphic, WorkerGraphic, BrokerGraphic, DatabaseGraphic } from '../shared/NodeGraphics';
+
+// Import all raw SVGs
+import GatewayIcon from '../../assets/icons/gateway.svg';
+import AuthIcon from '../../assets/icons/auth.svg';
+import DatabaseIcon from '../../assets/icons/database.svg';
+import BrokerIcon from '../../assets/icons/broker.svg';
+import WorkerIcon from '../../assets/icons/worker.svg';
+import ServiceIcon from '../../assets/icons/service.svg';
 
 const BuilderToolbar = () => {
   const onDragStart = (event, nodeType) => {
@@ -10,20 +16,18 @@ const BuilderToolbar = () => {
   };
 
   const nodeTypes = [
-    { type: 'gateway', label: 'Gateway', Graphic: GatewayGraphic },
-    { type: 'auth', label: 'Auth', Graphic: AuthGraphic },
-    { type: 'service', label: 'Service', Graphic: ServiceGraphic },
-    { type: 'worker', label: 'Worker', Graphic: WorkerGraphic },
-    { type: 'broker', label: 'Broker', Graphic: BrokerGraphic },
-    { type: 'db', label: 'Database', Graphic: DatabaseGraphic },
+    { type: 'gateway', label: 'Gateway', icon: GatewayIcon },
+    { type: 'auth', label: 'Auth', icon: AuthIcon },
+    { type: 'service', label: 'Service', icon: ServiceIcon },
+    { type: 'worker', label: 'Worker', icon: WorkerIcon },
+    { type: 'broker', label: 'Broker', icon: BrokerIcon },
+    { type: 'db', label: 'Database', icon: DatabaseIcon },
   ];
-
-  const iconColors = getStatusColors('ICON');
 
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-xl rounded-2xl px-6 py-3 z-10 flex items-center gap-8">
       
-      {/* 3D Drag & Drop Nodes */}
+      {/* Drag & Drop Node Icons */}
       <div className="flex items-center gap-5 border-r border-slate-200 pr-8">
         {nodeTypes.map((node) => (
           <div
@@ -32,7 +36,7 @@ const BuilderToolbar = () => {
             draggable
             className="flex flex-col items-center gap-1.5 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-transform duration-200"
           >
-            <node.Graphic colors={iconColors} className="w-10 h-10 drop-shadow-sm" />
+            <img src={node.icon} alt={node.label} className="w-10 h-10 drop-shadow-sm" />
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{node.label}</span>
           </div>
         ))}
