@@ -1,57 +1,35 @@
-const simulationLoop = require('./simulationLoop');
 const NodeFactory = require('../models/NodeFactory');
 const { Edge } = require('../models/Edge');
-const eventBus = require('./eventBus');
 
 class BlueprintLoader {
-  /**
-   * Loads a predefined JSON topology into the simulation engine.
-   * @param {object} blueprint - The JSON template containing nodes and edges.
-   */
-  static load(blueprint) {
+  static load(engine, templateName) {
+    const blueprint = this.getTemplate(templateName);
+    if (!blueprint) return;
+
     try {
-      // 1. Halt traffic and wipe the canvas clean
-      simulationLoop.setTraffic(false);
-      simulationLoop.clearTopology();
+      engine.setTraffic(false);
+      engine.clearTopology();
 
-      // 2. Instantiate and add all nodes using the Factory Pattern
-      if (blueprint.nodes && Array.isArray(blueprint.nodes)) {
-        blueprint.nodes.forEach(nodeData => {
-          const node = NodeFactory.createNode(
-            nodeData.id,
-            nodeData.label,
-            nodeData.type,
-            nodeData.config || {}
-          );
-          simulationLoop.addNode(node);
+      if (blueprint.nodes) {
+        blueprint.nodes.forEach(data => {
+          const node = NodeFactory.createNode(data.id, data.label, data.type, data.config || {});
+          engine.addNode(node);
         });
       }
 
-      // 3. Instantiate and wire up all network links
-      if (blueprint.edges && Array.isArray(blueprint.edges)) {
-        blueprint.edges.forEach(edgeData => {
-          const edge = new Edge(
-            edgeData.id,
-            edgeData.source,
-            edgeData.target,
-            edgeData.config || {}
-          );
-          simulationLoop.addEdge(edge);
+      if (blueprint.edges) {
+        blueprint.edges.forEach(data => {
+          const edge = new Edge(data.id, data.source, data.target, data.config || {});
+          engine.addEdge(edge);
         });
       }
 
-      eventBus.emit('system:notification', { message: `Successfully loaded blueprint: ${blueprint.name}` });
-      console.log(`[BlueprintLoader] Loaded topology: ${blueprint.name}`);
-      
+      engine.emit('system:notification', { message: `Successfully loaded blueprint: ${blueprint.name}` });
     } catch (error) {
       console.error('[BlueprintLoader] Failed to load blueprint:', error);
-      eventBus.emit('system:notification', { message: 'Failed to load architecture blueprint due to an error.' });
     }
   }
 
-  /**
-   * Central repository for pre-built topologies.
-   */
   static getTemplate(templateName) {
     const templates = {
       ecommerce: {
@@ -93,7 +71,6 @@ class BlueprintLoader {
         ]
       }
     };
-
     return templates[templateName] || null;
   }
 }

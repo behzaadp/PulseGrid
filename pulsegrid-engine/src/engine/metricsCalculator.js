@@ -1,50 +1,25 @@
-const simulationLoop = require('./simulationLoop');
-
 class MetricsCalculator {
-  /**
-   * Aggregates metrics from all nodes and edges to provide a system-wide health snapshot.
-   */
-  static getGlobalMetrics() {
-    const nodes = Array.from(simulationLoop.nodes.values());
-    const edges = Array.from(simulationLoop.edges.values());
+  static getGlobalMetrics(engine) {
+    const nodes = Array.from(engine.nodes.values());
+    const edges = Array.from(engine.edges.values());
+    let totalRequests = 0, totalFailed = 0, totalMemory = 0, totalCpu = 0, maxLatency = 0, sumApdex = 0;
+    let degradedNodes = 0, deadNodes = 0, severedEdges = 0;
 
-    let totalRequests = 0;
-    let totalFailed = 0;
-    let totalMemory = 0;
-    let totalCpu = 0;
-    let maxLatency = 0;
-    let sumApdex = 0;
-    
-    let degradedNodes = 0;
-    let deadNodes = 0;
-    let severedEdges = 0;
-
-    // Compute Node Metrics
     nodes.forEach(node => {
       totalRequests += node.metrics.requestsTotal;
       totalFailed += node.metrics.requestsFailed;
       totalMemory += node.metrics.memory;
       totalCpu += node.metrics.cpu;
       sumApdex += node.metrics.apdex;
-      
-      if (node.metrics.latency > maxLatency) {
-        maxLatency = node.metrics.latency;
-      }
-
+      if (node.metrics.latency > maxLatency) maxLatency = node.metrics.latency;
       if (node.status === 'DEGRADED') degradedNodes++;
       if (node.status === 'DEAD') deadNodes++;
     });
 
-    // Compute Edge Metrics (Network Partitions)
-    edges.forEach(edge => {
-      if (edge.status === 'SEVERED') severedEdges++;
-    });
+    edges.forEach(edge => { if (edge.status === 'SEVERED') severedEdges++; });
 
-    const nodeCount = nodes.length || 1; // Prevent division by zero
-    
-    const globalErrorRate = totalRequests > 0 
-      ? parseFloat(((totalFailed / totalRequests) * 100).toFixed(2)) 
-      : 0;
+    const nodeCount = nodes.length || 1;
+    const globalErrorRate = totalRequests > 0 ? parseFloat(((totalFailed / totalRequests) * 100).toFixed(2)) : 0;
 
     return {
       systemApdex: parseFloat((sumApdex / nodeCount).toFixed(2)),
@@ -54,12 +29,6 @@ class MetricsCalculator {
       maxLatency,
       totalRequests,
       activeIncidents: degradedNodes + deadNodes + severedEdges,
-      healthOverview: {
-        totalNodes: nodes.length,
-        healthy: nodes.length - degradedNodes - deadNodes,
-        degraded: degradedNodes,
-        dead: deadNodes
-      }
     };
   }
 }

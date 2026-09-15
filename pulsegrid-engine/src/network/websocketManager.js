@@ -1,68 +1,62 @@
 const { WebSocketServer } = require('ws');
-const eventBus = require('../engine/eventBus');
-const simulationLoop = require('../engine/simulationLoop');
+const crypto = require('crypto');
+const PulseEngine = require('../engine/PulseEngine');
 const MessageRouter = require('./messageRouter');
 
 class WebSocketManager {
   constructor() {
     this.wss = null;
+    this.engines = new Map(); // Store active sandbox instances
   }
 
-  /**
-   * Attaches the WebSocket server to the core HTTP server
-   */
   initialize(httpServer) {
     this.wss = new WebSocketServer({ server: httpServer });
 
     this.wss.on('connection', (ws) => {
-      console.log('[WebSocket] Client connected to PulseGrid Telemetry');
+      const sessionId = crypto.randomUUID();
+      console.log(`[WebSocket] Client connected. Spinning up Sandbox: ${sessionId}`);
+      
+      // 1. Create a dedicated engine for this user
+      const engine = new PulseEngine(sessionId);
+      this.engines.set(sessionId, engine);
 
-      // 1. Immediately send the full topology state to the new client
-      const fullSnapshot = simulationLoop.getFullSnapshot();
+      // 2. Subscribe the WebSocket to this specific engine's events
+      engine.on('broadcast:delta', (delta) => {
+        if (ws.readyState === 1 /* WebSocket.OPEN */) {
+          ws.send(JSON.stringify({ type: 'DELTA_UPDATE', payload: delta }));
+        }
+      });
+
+      engine.on('system:notification', (notification) => {
+        if (ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: 'NOTIFICATION', payload: notification }));
+        }
+      });
+
+      // 3. Start the engine and send initial empty state
+      engine.start();
       ws.send(JSON.stringify({ 
         type: 'FULL_SNAPSHOT', 
-        payload: fullSnapshot 
+        payload: engine.getFullSnapshot() 
       }));
 
-      // 2. Listen for UI interactions and pass them to the router
+      // 4. Route incoming messages to this specific engine
       ws.on('message', (message) => {
-        MessageRouter.route(message, ws);
+        MessageRouter.route(message, ws, engine);
       });
 
       ws.on('close', () => {
-        console.log('[WebSocket] Client disconnected');
+        console.log(`[WebSocket] Client disconnected. Destroying Sandbox: ${sessionId}`);
+        engine.stop();
+        engine.clearTopology(); // Release memory
+        this.engines.delete(sessionId);
       });
-      
+
       ws.on('error', (err) => {
-        console.error('[WebSocket] Connection Error:', err);
+        console.error(`[WebSocket] Session ${sessionId} Error:`, err);
       });
     });
-
-    // 3. Subscribe to the Engine's delta broadcast and push to all active clients
-    eventBus.on('broadcast:delta', (delta) => {
-      this.broadcast({ type: 'DELTA_UPDATE', payload: delta });
-    });
-
-    // 4. Subscribe to system-wide notification events (like a node dying)
-    eventBus.on('system:notification', (notification) => {
-      this.broadcast({ type: 'NOTIFICATION', payload: notification });
-    });
-  }
-
-  /**
-   * Pushes a stringified JSON payload to all connected clients
-   */
-  broadcast(data) {
-    if (!this.wss) return;
-    const payload = JSON.stringify(data);
-    
-    for (const client of this.wss.clients) {
-      if (client.readyState === 1 /* WebSocket.OPEN */) {
-        client.send(payload);
-      }
-    }
   }
 }
 
-// Export as Singleton
 module.exports = new WebSocketManager();
