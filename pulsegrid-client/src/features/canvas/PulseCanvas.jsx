@@ -12,10 +12,10 @@ import AuthNode from '../nodes/AuthNode';
 import DatabaseNode from '../nodes/DatabaseNode';
 import BrokerNode from '../nodes/BrokerNode';
 import WorkerNode from '../nodes/WorkerNode';
-import GenericNode from '../nodes/GenericNode';
+import ServiceNode from '../nodes/ServiceNode';
 import TrafficEdge from '../edges/TrafficEdge';
 
-const nodeTypes = { gateway: GatewayNode, auth: AuthNode, db: DatabaseNode, broker: BrokerNode, worker: WorkerNode, service: GenericNode };
+const nodeTypes = { gateway: GatewayNode, auth: AuthNode, db: DatabaseNode, broker: BrokerNode, worker: WorkerNode, service: ServiceNode };
 const edgeTypes = { traffic: TrafficEdge };
 
 // Dagre Layout Generator
