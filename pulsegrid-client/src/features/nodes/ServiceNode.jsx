@@ -2,13 +2,13 @@ import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import useEngineStore from '../../store/useEngineStore';
 import { getStatusColors } from '../../utils/constants';
-import { DatabaseGraphic } from '../../components/shared/NodeGraphics';
+import { ServiceGraphic } from '../../components/shared/NodeGraphics';
 
-const DatabaseNode = ({ id, data, selected }) => {
+const ServiceNode = ({ id, data, selected }) => {
   const liveNode = useEngineStore((state) => state.nodes[id]);
   const status = liveNode?.status || data.status || 'HEALTHY';
   const metrics = liveNode?.metrics || data.metrics || { cpu: 0, latency: 0, queueDepth: 0 };
-  const label = liveNode?.label || data.label || 'Database';
+  const label = liveNode?.label || data.label || 'Generic Node';
   const colors = getStatusColors(status);
 
   return (
@@ -19,7 +19,7 @@ const DatabaseNode = ({ id, data, selected }) => {
       <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-indigo-500 !border-2 !border-white" />
 
       <div className="w-full h-24 flex items-center justify-center">
-        <DatabaseGraphic colors={colors} className="w-28 h-28 drop-shadow-md transition-colors duration-500" />
+        <ServiceGraphic colors={colors} className="w-28 h-28 drop-shadow-md transition-colors duration-500" />
       </div>
 
       <div className="mt-1 flex items-center justify-between">
@@ -35,4 +35,4 @@ const DatabaseNode = ({ id, data, selected }) => {
     </div>
   );
 };
-export default memo(DatabaseNode);
+export default memo(ServiceNode);

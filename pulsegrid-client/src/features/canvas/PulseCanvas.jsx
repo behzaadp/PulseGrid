@@ -149,6 +149,21 @@ const PulseCanvas = () => {
     });
   }, []);
 
+  const onNodesDelete = useCallback((deletedNodes) => {
+    deletedNodes.forEach((node) => {
+      websocketClient.sendCommand('REMOVE_NODE', { id: node.id });
+      if (node.id === useUiStore.getState().selectedNodeId) {
+        setSelectedNode(null); // Close drawer if the deleted node was selected
+      }
+    });
+  }, [setSelectedNode]);
+
+  const onEdgesDelete = useCallback((deletedEdges) => {
+    deletedEdges.forEach((edge) => {
+      websocketClient.sendCommand('REMOVE_EDGE', { id: edge.id });
+    });
+  }, []);
+
   return (
     <div className="w-full h-screen bg-slate-50" ref={reactFlowWrapper}>
       <ReactFlow
@@ -158,6 +173,9 @@ const PulseCanvas = () => {
         edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodesDelete={onNodesDelete}   
+        onEdgesDelete={onEdgesDelete}   
+        deleteKeyCode={['Backspace', 'Delete']}
         onConnect={onConnect}
         onSelectionChange={onSelectionChange}
         onDragOver={onDragOver}
