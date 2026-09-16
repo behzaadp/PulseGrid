@@ -15,7 +15,6 @@ const BuilderToolbar = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // Correctly placed inside the component
   const clearCanvas = () => {
     websocketClient.sendCommand('CLEAR_TOPOLOGY');
   };
@@ -55,8 +54,19 @@ const BuilderToolbar = () => {
           className="text-xs font-bold bg-slate-50 text-slate-700 border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer hover:bg-slate-100 shadow-sm transition-all focus:ring-2 focus:ring-indigo-500"
         >
           <option value="" disabled>Load Blueprint...</option>
-          <option value="ecommerce">E-Commerce Architecture</option>
-          <option value="social_media">Social Media Feed</option>
+          <optgroup label="Standard Systems">
+            <option value="ecommerce">E-Commerce Architecture</option>
+            <option value="social_media">Social Media Feed</option>
+            <option value="ride_sharing">Ride-Sharing Matchmaker</option>
+          </optgroup>
+          <optgroup label="High-Throughput">
+            <option value="iot_pipeline">IoT Telemetry Pipeline</option>
+            <option value="trading_engine">Financial Trading Engine</option>
+            <option value="distributed_logging">Distributed Logging (SIEM)</option>
+          </optgroup>
+          <optgroup label="Distributed Consensus">
+            <option value="raft_cluster">Raft Consensus Cluster</option>
+          </optgroup>
         </select>
 
         <button 
