@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 const packetPool = require('../models/PacketPool');
+const RaftOrchestrator = require('./RaftOrchestrator');
 
 const PHYSICS_TICK_RATE_MS = 20;
 const BROADCAST_TICK_RATE_MS = 100;
@@ -22,6 +23,8 @@ class PulseEngine extends EventEmitter {
     this.isTrafficActive = false;
     this.trafficRatePerSec = 20; 
     this.trafficAccumulator = 0;
+
+    this.raftOrchestrator = new RaftOrchestrator(this);
   }
 
   addNode(node) {
@@ -87,6 +90,8 @@ class PulseEngine extends EventEmitter {
     this.lastPhysicsTick = now;
 
     this.generateTraffic(deltaMs);
+
+    this.raftOrchestrator.tick(deltaMs);
 
     for (const edge of this.edges.values()) {
       const targetNode = this.nodes.get(edge.targetId);
