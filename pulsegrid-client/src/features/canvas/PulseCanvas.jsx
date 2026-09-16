@@ -136,7 +136,15 @@ const PulseCanvas = () => {
     });
   }, []);
 
-  const onSelectionChange = useCallback(({ nodes }) => setSelectedNode(nodes.length > 0 ? nodes[0].id : null), [setSelectedNode]);
+  const onSelectionChange = useCallback(({ nodes, edges }) => {
+    if (nodes.length > 0) {
+      useUiStore.getState().setSelectedNode(nodes[0].id);
+    } else if (edges.length > 0) {
+      useUiStore.getState().setSelectedEdge(edges[0].id);
+    } else {
+      useUiStore.getState().clearSelection();
+    }
+  }, []);
 
   const onNodesDelete = useCallback((deletedNodes) => {
     deletedNodes.forEach((node) => {

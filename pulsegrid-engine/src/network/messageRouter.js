@@ -40,6 +40,19 @@ class MessageRouter {
           if (node) node.restart();
           break;
         }
+
+        case 'SET_AUTO_RECOVERY': 
+          engine.k8sController.setEnabled(payload.enabled); 
+          break;
+        case 'TOGGLE_EDGE': {
+          const edge = engine.edges.get(payload.id);
+          if (edge) {
+            edge.status = edge.status === 'SEVERED' ? 'CONNECTED' : 'SEVERED';
+            engine.emit('topology:changed');
+          }
+          break;
+        }
+        
         case 'INJECT_FAULT': ChaosRegistry.executeFault(engine, payload.faultType, payload.id, payload.params); break;
         case 'CLEAR_FAULT': ChaosRegistry.clearFault(engine, payload.faultType, payload.id); break;
         case 'EXECUTE_SCENARIO': ChaosRegistry.executeScenario(engine, payload.scenarioId); break;

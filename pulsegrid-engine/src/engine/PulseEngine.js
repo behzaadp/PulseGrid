@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const packetPool = require('../models/PacketPool');
 const RaftOrchestrator = require('./RaftOrchestrator');
+const K8sController = require('./K8sController');
 
 const PHYSICS_TICK_RATE_MS = 20;
 const BROADCAST_TICK_RATE_MS = 100;
@@ -25,6 +26,8 @@ class PulseEngine extends EventEmitter {
     this.trafficAccumulator = 0;
 
     this.raftOrchestrator = new RaftOrchestrator(this);
+
+    this.k8sController = new K8sController(this);
   }
 
   addNode(node) {
@@ -92,6 +95,8 @@ class PulseEngine extends EventEmitter {
     this.generateTraffic(deltaMs);
 
     this.raftOrchestrator.tick(deltaMs);
+
+    this.k8sController.tick(deltaMs);
 
     for (const edge of this.edges.values()) {
       const targetNode = this.nodes.get(edge.targetId);

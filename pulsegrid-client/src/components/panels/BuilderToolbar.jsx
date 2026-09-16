@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import websocketClient from '../../services/websocketClient';
 
 // Import all raw SVGs
@@ -18,6 +18,14 @@ const BuilderToolbar = () => {
   const clearCanvas = () => {
     websocketClient.sendCommand('CLEAR_TOPOLOGY');
   };
+
+  const [k8sEnabled, setK8sEnabled] = useState(false);
+
+  const toggleK8s = () => {
+  const newState = !k8sEnabled;
+  setK8sEnabled(newState);
+  websocketClient.sendCommand('SET_AUTO_RECOVERY', { enabled: newState });
+};
 
   const nodeTypes = [
     { type: 'gateway', label: 'Gateway', icon: GatewayIcon },
@@ -48,6 +56,15 @@ const BuilderToolbar = () => {
 
       {/* Tactile Flow Controls */}
       <div className="flex items-center gap-3">
+
+        <button 
+  onClick={toggleK8s}
+  className={`text-xs font-bold px-4 py-2 rounded-lg shadow-sm active:scale-95 transition-all flex items-center gap-2 border ${k8sEnabled ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}`}
+>
+  <div className={`w-2 h-2 rounded-full ${k8sEnabled ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
+  Auto-Recovery (K8s)
+</button>
+
         <select 
           onChange={(e) => websocketClient.sendCommand('LOAD_BLUEPRINT', { templateName: e.target.value })}
           defaultValue=""

@@ -144,6 +144,32 @@ const NodeInspector = () => {
               <p className="text-[10px] text-rose-700 leading-tight">Degrades memory until an OOM crash occurs.</p>
             </div>
 
+            {/* Network Latency */}
+            <div className="p-4 border border-violet-200 bg-violet-50 rounded-xl shadow-sm">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-bold text-violet-900">I/O Latency</span>
+                {node.faults?.hasLatencySpike ? (
+                  <button onClick={() => clearFault('latency')} className="text-xs font-bold bg-violet-200 text-violet-800 px-3 py-1.5 rounded shadow-sm hover:bg-violet-300 active:scale-95 transition-all">Clear</button>
+                ) : (
+                  <button onClick={() => triggerFault('latency')} className="text-xs font-bold bg-violet-500 text-white px-3 py-1.5 rounded shadow-sm hover:bg-violet-600 active:scale-95 transition-all">Inject</button>
+                )}
+              </div>
+              <p className="text-[10px] text-violet-700 leading-tight">Simulates network/disk blocking, increasing queue backpressure.</p>
+            </div>
+
+            {/* Bad Release */}
+            <div className="p-4 border border-fuchsia-200 bg-fuchsia-50 rounded-xl shadow-sm">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-bold text-fuchsia-900">Bad Release</span>
+                {node.faults?.hasErrorOverride ? (
+                  <button onClick={() => clearFault('error_rate')} className="text-xs font-bold bg-fuchsia-200 text-fuchsia-800 px-3 py-1.5 rounded shadow-sm hover:bg-fuchsia-300 active:scale-95 transition-all">Clear</button>
+                ) : (
+                  <button onClick={() => triggerFault('error_rate')} className="text-xs font-bold bg-fuchsia-500 text-white px-3 py-1.5 rounded shadow-sm hover:bg-fuchsia-600 active:scale-95 transition-all">Inject</button>
+                )}
+              </div>
+              <p className="text-[10px] text-fuchsia-700 leading-tight">Forces a 50% HTTP 500 error rate to test circuit breakers.</p>
+            </div>
+
             <h3 className="text-xs font-bold text-rose-400 uppercase mt-8 mb-3">System-Wide Catastrophe</h3>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => triggerScenario('thanos_snap')} className="bg-slate-800 text-white text-xs font-bold py-2.5 rounded-lg shadow-md hover:bg-slate-700 active:scale-95 transition-all">Thanos Snap</button>

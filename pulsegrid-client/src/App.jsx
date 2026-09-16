@@ -4,7 +4,8 @@ import websocketClient from './services/websocketClient';
 
 import TelemetryDashboard from './components/panels/TelemetryDashboard';
 import BuilderToolbar from './components/panels/BuilderToolbar';
-import NodeInspector from './components/panels/NodeInspector'; // <-- Changed here
+import NodeInspector from './components/panels/NodeInspector';
+import EdgeInspector from './components/panels/EdgeInspector';
 
 function App() {
   useEffect(() => {
@@ -17,7 +18,8 @@ function App() {
       <PulseCanvas />
       <TelemetryDashboard />
       <BuilderToolbar />
-      <NodeInspector /> {/* <-- Changed here */}
+      <NodeInspector />
+      <EdgeInspector /> 
     </div>
   );
 }
