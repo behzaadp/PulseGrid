@@ -37,7 +37,7 @@ const BuilderToolbar = () => {
   ];
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-xl rounded-2xl px-6 py-3 z-10 flex items-center gap-8">
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-xl rounded-2xl px-6 py-3 z-10 flex items-center gap-8">
       
       {/* Drag & Drop Node Icons */}
       <div className="flex items-center gap-5 border-r border-slate-200 pr-8">
